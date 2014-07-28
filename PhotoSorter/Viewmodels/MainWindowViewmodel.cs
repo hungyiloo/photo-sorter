@@ -1,31 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
+using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Forms;
-using System.ComponentModel;
 
-namespace PhotoSorter
+namespace PhotoSorter.Viewmodels
 {
-    public partial class MainWindow : Window, INotifyPropertyChanged
+    public class MainWindowViewmodel : INotifyPropertyChanged
     {
-        public MainWindow()
-        {
-            InitializeComponent();
-        }
-
-        # region Public Properties
+        # region Public Properties (bound to view)
 
         public DirectoryInfo PhotoSourceDir { get; set; }
         public DirectoryInfo PhotoDestinationDir { get; set; }
@@ -59,9 +48,10 @@ namespace PhotoSorter
 
         # endregion
 
-        # region Private Methods (Imperative)
+        # region Public Methods (imperative actions)
 
-        private void _SetPhotoSourceDir() {
+        public void SetPhotoSourceDir()
+        {
             var dialog = new FolderBrowserDialog();
             DialogResult result = dialog.ShowDialog();
             if (result == System.Windows.Forms.DialogResult.OK)
@@ -88,7 +78,7 @@ namespace PhotoSorter
                 OnPropertyChanged("Photo");
             }
         }
-        private void _SetPhotoDestinationDir()
+        public void SetPhotoDestinationDir()
         {
             var dialog = new FolderBrowserDialog();
             DialogResult result = dialog.ShowDialog();
@@ -99,7 +89,7 @@ namespace PhotoSorter
                 OnPropertyChanged("SetupMode");
             }
         }
-        private void _AcceptPhoto()
+        public void AcceptPhoto()
         {
             var photo = Photos.Current;
             try
@@ -119,14 +109,14 @@ namespace PhotoSorter
                 }
             }
 
-            _NextPhoto();
+            NextPhoto();
         }
-        private void _RejectPhoto()
+        public void RejectPhoto()
         {
-            _NextPhoto();
+            NextPhoto();
         }
 
-        private void _NextPhoto()
+        public void NextPhoto()
         {
             if (!Photos.MoveNext())
             {
@@ -136,7 +126,7 @@ namespace PhotoSorter
             OnPropertyChanged("Photo");
         }
 
-        private void _PreviousPhoto()
+        public void PreviousPhoto()
         {
             // Try to go back, but do nothing if already at the beginning of the list
             if (Photos.MovePrevious())
@@ -147,46 +137,7 @@ namespace PhotoSorter
 
         # endregion
 
-        # region UI Event Handlers
-
-        private void MenuItem_LoadPhotos_Click(object sender, RoutedEventArgs e)
-        {
-            _SetPhotoSourceDir();
-        }
-
-        private void MenuItem_SetDestination_Click(object sender, RoutedEventArgs e)
-        {
-            _SetPhotoDestinationDir();
-        }
-
-        private void Button_LoadPhotos_Click(object sender, RoutedEventArgs e)
-        {
-            _SetPhotoSourceDir();
-        }
-
-        private void Button_SetDestination_Click(object sender, RoutedEventArgs e)
-        {
-            _SetPhotoDestinationDir();
-        }
-
-        private void Button_Back_Click(object sender, RoutedEventArgs e)
-        {
-            _PreviousPhoto();
-        }
-
-        private void Button_Accept_Click(object sender, RoutedEventArgs e)
-        {
-            _AcceptPhoto();
-        }
-
-        private void Button_Reject_Click(object sender, RoutedEventArgs e)
-        {
-            _RejectPhoto();
-        }
-
-        # endregion
-
-        # region Property Changed Notification
+        # region Property Changed Notification Implementation
 
         public event PropertyChangedEventHandler PropertyChanged;
 
