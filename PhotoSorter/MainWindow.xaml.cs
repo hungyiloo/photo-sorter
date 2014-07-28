@@ -20,6 +20,9 @@ namespace PhotoSorter
 {
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
+        public DirectoryInfo PhotoSourceDir { get; set; }
+        public DirectoryInfo PhotoDestinationDir { get; set; }
+        public IterableList<FileInfo> Photos { get; set; }
         public bool SortingMode {
             get {
                 return PhotoSourceDir != null && PhotoDestinationDir != null;
@@ -32,19 +35,14 @@ namespace PhotoSorter
                 return PhotoSourceDir == null || PhotoDestinationDir == null;
             }
         }
-
-        public DirectoryInfo PhotoSourceDir { get; set; }
-        public DirectoryInfo PhotoDestinationDir { get; set; }
-        public IEnumerator<FileInfo> PhotosIterator { get; set; }
-
         public ImageSource Photo
         {
             get
             {
-                if (PhotosIterator == null || PhotosIterator.Current == null)
+                if (Photos == null || Photos.Current == null)
                     return null;
 
-                var img = new BitmapImage(new Uri(String.Format(PhotosIterator.Current.FullName), UriKind.Relative));
+                var img = new BitmapImage(new Uri(String.Format(Photos.Current.FullName), UriKind.Relative));
                 img.Freeze(); // -> to prevent error: "Must create DependencySource on same Thread as the DependencyObject"
                 return img;
             }
@@ -61,7 +59,7 @@ namespace PhotoSorter
             if (result == System.Windows.Forms.DialogResult.OK)
             {
                 PhotoSourceDir = new DirectoryInfo(dialog.SelectedPath);
-                var photos = new List<FileInfo>();
+                var photos = new IterableList<FileInfo>();
                 foreach (FileInfo f in PhotoSourceDir.EnumerateFiles("*.*", SearchOption.AllDirectories))
                 {
                     if (f.Extension.ToUpper() == ".JPG" || f.Extension.ToUpper() == ".JPEG" || f.Extension.ToUpper() == ".PNG")
@@ -69,12 +67,8 @@ namespace PhotoSorter
                 }
                 if (photos.Count > 0)
                 {
-                    PhotosIterator = photos.GetEnumerator();
-                    if (!PhotosIterator.MoveNext())
-                    {
-                        PhotosIterator = photos.GetEnumerator();
-                        PhotosIterator.MoveNext();
-                    }
+                    Photos = photos;
+                    Photos.MoveNext();
                 }
                 else
                 {
@@ -99,7 +93,7 @@ namespace PhotoSorter
         }
         public void AcceptPhoto()
         {
-            var photo = PhotosIterator.Current;
+            var photo = Photos.Current;
             try
             {
                 photo.CopyTo(String.Format("{0}\\{1}", PhotoDestinationDir.FullName, photo.Name));
@@ -116,22 +110,31 @@ namespace PhotoSorter
                     return;
                 }
             }
-            
-            if (!PhotosIterator.MoveNext())
-            {
-                PhotosIterator.Reset();
-                PhotosIterator.MoveNext();
-            }
-            OnPropertyChanged("Photo");
+
+            _NextPhoto();
         }
         public void RejectPhoto()
         {
-            if (!PhotosIterator.MoveNext())
+            _NextPhoto();
+        }
+
+        private void _NextPhoto()
+        {
+            if (!Photos.MoveNext())
             {
-                PhotosIterator.Reset();
-                PhotosIterator.MoveNext();
+                Photos.Reset();
+                Photos.MoveNext();
             }
             OnPropertyChanged("Photo");
+        }
+
+        private void _PreviousPhoto()
+        {
+            // Try to go back, but do nothing if already at the beginning of the list
+            if (Photos.MovePrevious())
+            {
+                OnPropertyChanged("Photo");
+            }
         }
 
         # region Click Handlers
@@ -149,6 +152,11 @@ namespace PhotoSorter
         private void Button_SetDestination_Click(object sender, RoutedEventArgs e)
         {
             SetPhotoDestinationDir();
+        }
+
+        private void Button_Back_Click(object sender, RoutedEventArgs e)
+        {
+            _PreviousPhoto();
         }
 
         private void Button_Accept_Click(object sender, RoutedEventArgs e)

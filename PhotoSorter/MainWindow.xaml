@@ -8,7 +8,7 @@
     </Window.Resources>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="_Options">
+            <MenuItem Header="_File">
                 <MenuItem Header="_Load Photos" Click="MenuItem_LoadPhotos_Click"/>
                 <MenuItem Header="_Set Destination"/>
             </MenuItem>
@@ -20,6 +20,7 @@
             </Grid.RowDefinitions>
             <Image HorizontalAlignment="Stretch" Grid.Row="0" Margin="10" VerticalAlignment="Top" Source="{Binding Photo}"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="1" Margin="10" Visibility="{Binding SortingMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Button Content="Go Back 1" Width="75" Margin="5,0,5,0" Click="Button_Back_Click"/>
                 <Button Content="Accept" Width="75" Margin="5,0,5,0" Click="Button_Accept_Click"/>
                 <Button Content="Reject" Width="75" Margin="5,0,5,0" Click="Button_Reject_Click"/>
             </StackPanel>
