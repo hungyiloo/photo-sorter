@@ -103,7 +103,7 @@ namespace PhotoSorter.Viewmodels
                 _view.Alert("No photos found");
                 _PhotoSourceDir = null;
             }
-            OnPropertyChanged("SortingMode", "SetupMode", "Progress", "CopyDetails");
+            OnPropertyChanged("SortingMode", "SetupMode", "Photo", "Progress", "CopyDetails");
         }
         public void SetPhotoDestinationDir(DirectoryInfo di)
         {
