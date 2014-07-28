@@ -1,20 +1,23 @@
 ﻿using PhotoSorter.Extensions;
+using PhotoSorter.Views;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace PhotoSorter.Viewmodels
 {
-    public class MainWindowViewmodel : INotifyPropertyChanged
+    public class MainViewmodel : INotifyPropertyChanged
     {
+        private IMainView _view;
+        public MainViewmodel(IMainView view)
+        {
+            _view = view;
+        }
+
         # region Public Properties (bound to view)
 
         public DirectoryInfo PhotoSourceDir { get; set; }
@@ -53,11 +56,10 @@ namespace PhotoSorter.Viewmodels
 
         public void SetPhotoSourceDir()
         {
-            var dialog = new FolderBrowserDialog();
-            DialogResult result = dialog.ShowDialog();
-            if (result == System.Windows.Forms.DialogResult.OK)
+            var di = _view.SelectDirectory();
+            if (di != null)
             {
-                PhotoSourceDir = new DirectoryInfo(dialog.SelectedPath);
+                PhotoSourceDir = di;
                 var photos = new IterableList<FileInfo>();
                 foreach (FileInfo f in PhotoSourceDir.EnumerateFiles("*.*", SearchOption.AllDirectories))
                 {
@@ -71,7 +73,7 @@ namespace PhotoSorter.Viewmodels
                 }
                 else
                 {
-                    System.Windows.MessageBox.Show("No photos found", "Oops!", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _view.Alert("No photos found");
                     PhotoSourceDir = null;
                 }
                 OnPropertyChanged("SortingMode");
@@ -81,11 +83,10 @@ namespace PhotoSorter.Viewmodels
         }
         public void SetPhotoDestinationDir()
         {
-            var dialog = new FolderBrowserDialog();
-            DialogResult result = dialog.ShowDialog();
-            if (result == System.Windows.Forms.DialogResult.OK)
+            var di = _view.SelectDirectory();
+            if (di != null)
             {
-                PhotoDestinationDir = new DirectoryInfo(dialog.SelectedPath);
+                PhotoDestinationDir = di;
                 OnPropertyChanged("SortingMode");
                 OnPropertyChanged("SetupMode");
             }
@@ -99,8 +100,7 @@ namespace PhotoSorter.Viewmodels
             }
             catch (IOException e)
             {
-                MessageBoxResult confirm = System.Windows.MessageBox.Show("This file already exists in the destination. Do you want to overwrite?", "Warning!", MessageBoxButton.YesNo, MessageBoxImage.Exclamation);
-                if (confirm == MessageBoxResult.Yes)
+                if (_view.Confirm("This file already exists in the destination. Do you want to overwrite?"))
                 {
                     photo.CopyTo(String.Format("{0}\\{1}", PhotoDestinationDir.FullName, photo.Name), true);
                 }
@@ -110,10 +110,6 @@ namespace PhotoSorter.Viewmodels
                 }
             }
 
-            NextPhoto();
-        }
-        public void RejectPhoto()
-        {
             NextPhoto();
         }
 
