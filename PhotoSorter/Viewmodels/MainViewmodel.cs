@@ -16,35 +16,40 @@ namespace PhotoSorter.Viewmodels
         public MainViewmodel(IMainView view)
         {
             _view = view;
+            var settings = PhotoSorter.Properties.Settings.Default;
+            if (!String.IsNullOrEmpty(settings.SourceDirectory))
+                SetPhotoSourceDir(new DirectoryInfo(settings.SourceDirectory));
+            if (!String.IsNullOrEmpty(settings.DestinationDirectory))
+                SetPhotoDestinationDir(new DirectoryInfo(settings.DestinationDirectory));
+            if (!String.IsNullOrEmpty(settings.Bookmark))
+                GoToPhoto(settings.Bookmark);
         }
 
         # region Public Properties (bound to view)
 
-        public DirectoryInfo PhotoSourceDir { get; set; }
-        public DirectoryInfo PhotoDestinationDir { get; set; }
-        public IterableList<FileInfo> Photos { get; set; }
+        
         public bool SortingMode
         {
             get
             {
-                return PhotoSourceDir != null && PhotoDestinationDir != null;
+                return _PhotoSourceDir != null && _PhotoDestinationDir != null;
             }
         }
         public bool SetupMode
         {
             get
             {
-                return PhotoSourceDir == null || PhotoDestinationDir == null;
+                return _PhotoSourceDir == null || _PhotoDestinationDir == null;
             }
         }
         public ImageSource Photo
         {
             get
             {
-                if (Photos == null || Photos.Current == null)
+                if (_Photos == null || _Photos.Current == null)
                     return null;
 
-                var img = new BitmapImage(new Uri(String.Format(Photos.Current.FullName), UriKind.Relative));
+                var img = new BitmapImage(new Uri(String.Format(_Photos.Current.FullName), UriKind.Relative));
                 img.Freeze(); // -> to prevent error: "Must create DependencySource on same Thread as the DependencyObject"
                 return img;
             }
@@ -52,57 +57,55 @@ namespace PhotoSorter.Viewmodels
 
         # endregion
 
+        # region Private Properties
+        private DirectoryInfo _PhotoSourceDir { get; set; }
+        private DirectoryInfo _PhotoDestinationDir { get; set; }
+        private IterableList<FileInfo> _Photos { get; set; }
+        # endregion
+
         # region Public Methods (imperative actions)
 
-        public void SetPhotoSourceDir()
+        public void SetPhotoSourceDir(DirectoryInfo di)
         {
-            var di = _view.SelectDirectory();
-            if (di != null)
+            _PhotoSourceDir = di;
+            var photos = new IterableList<FileInfo>();
+            foreach (FileInfo f in _PhotoSourceDir.EnumerateFiles("*.*", SearchOption.AllDirectories))
             {
-                PhotoSourceDir = di;
-                var photos = new IterableList<FileInfo>();
-                foreach (FileInfo f in PhotoSourceDir.EnumerateFiles("*.*", SearchOption.AllDirectories))
-                {
-                    if (f.Extension.ToUpper() == ".JPG" || f.Extension.ToUpper() == ".JPEG" || f.Extension.ToUpper() == ".PNG")
-                        photos.Add(f);
-                }
-                if (photos.Count > 0)
-                {
-                    Photos = photos;
-                    Photos.MoveNext();
-                }
-                else
-                {
-                    _view.Alert("No photos found");
-                    PhotoSourceDir = null;
-                }
-                OnPropertyChanged("SortingMode");
-                OnPropertyChanged("SetupMode");
-                OnPropertyChanged("Photo");
+                if (f.Extension.ToUpper() == ".JPG" || f.Extension.ToUpper() == ".JPEG" || f.Extension.ToUpper() == ".PNG")
+                    photos.Add(f);
             }
+            if (photos.Count > 0)
+            {
+                _Photos = photos;
+                _Photos.MoveNext();
+            }
+            else
+            {
+                _view.Alert("No photos found");
+                _PhotoSourceDir = null;
+            }
+            OnPropertyChanged("SortingMode");
+            OnPropertyChanged("SetupMode");
+            OnPropertyChanged("Photo");
         }
-        public void SetPhotoDestinationDir()
+        public void SetPhotoDestinationDir(DirectoryInfo di)
         {
-            var di = _view.SelectDirectory();
-            if (di != null)
-            {
-                PhotoDestinationDir = di;
-                OnPropertyChanged("SortingMode");
-                OnPropertyChanged("SetupMode");
-            }
+            _PhotoDestinationDir = di;
+            OnPropertyChanged("SortingMode");
+            OnPropertyChanged("SetupMode");
         }
         public void AcceptPhoto()
         {
-            var photo = Photos.Current;
+            var photo = _Photos.Current;
             try
             {
-                photo.CopyTo(String.Format("{0}\\{1}", PhotoDestinationDir.FullName, photo.Name));
+                photo.CopyTo(String.Format("{0}\\{1}", _PhotoDestinationDir.FullName, photo.Name));
             }
             catch (IOException e)
             {
                 if (_view.Confirm("This file already exists in the destination. Do you want to overwrite?"))
                 {
-                    photo.CopyTo(String.Format("{0}\\{1}", PhotoDestinationDir.FullName, photo.Name), true);
+                    photo.CopyTo(String.Format("{0}\\{1}", _PhotoDestinationDir.FullName, photo.Name), true);
                 }
                 else
                 {
@@ -115,10 +118,10 @@ namespace PhotoSorter.Viewmodels
 
         public void NextPhoto()
         {
-            if (!Photos.MoveNext())
+            if (!_Photos.MoveNext())
             {
-                Photos.Reset();
-                Photos.MoveNext();
+                _Photos.Reset();
+                _Photos.MoveNext();
             }
             OnPropertyChanged("Photo");
         }
@@ -126,9 +129,39 @@ namespace PhotoSorter.Viewmodels
         public void PreviousPhoto()
         {
             // Try to go back, but do nothing if already at the beginning of the list
-            if (Photos.MovePrevious())
+            if (_Photos.MovePrevious())
             {
                 OnPropertyChanged("Photo");
+            }
+        }
+
+        public void GoToPhoto(string path)
+        {
+            FileInfo match = null;
+            foreach (var photo in _Photos) {
+                if (photo.FullName.Equals(path))
+                    match = photo;
+            }
+            if (match != null)
+            {
+                _Photos.Position = _Photos.IndexOf(match);
+                OnPropertyChanged("Photo");
+            }
+            else
+            {
+                _view.Alert(String.Format("Photo '{0}' not found!", path));
+            }
+        }
+
+        public void SaveSettings()
+        {
+            var settings = PhotoSorter.Properties.Settings.Default;
+            if (SortingMode)
+            {
+                settings.Bookmark = _Photos.Current.FullName;
+                settings.SourceDirectory = _PhotoSourceDir.FullName;
+                settings.DestinationDirectory = _PhotoDestinationDir.FullName;
+                settings.Save();
             }
         }
 

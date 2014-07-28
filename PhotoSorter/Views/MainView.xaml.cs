@@ -56,22 +56,38 @@ namespace PhotoSorter.Views
 
         private void MenuItem_LoadPhotos_Click(object sender, RoutedEventArgs e)
         {
-            _viewmodel.SetPhotoSourceDir();
+            var di = SelectDirectory();
+            if (di != null)
+            {
+                _viewmodel.SetPhotoSourceDir(di);
+            }
         }
 
         private void MenuItem_SetDestination_Click(object sender, RoutedEventArgs e)
         {
-            _viewmodel.SetPhotoDestinationDir();
+            var di = SelectDirectory();
+            if (di != null)
+            {
+                _viewmodel.SetPhotoDestinationDir(di);
+            }
         }
 
         private void Button_LoadPhotos_Click(object sender, RoutedEventArgs e)
         {
-            _viewmodel.SetPhotoSourceDir();
+            var di = SelectDirectory();
+            if (di != null)
+            {
+                _viewmodel.SetPhotoSourceDir(di);
+            }
         }
 
         private void Button_SetDestination_Click(object sender, RoutedEventArgs e)
         {
-            _viewmodel.SetPhotoDestinationDir();
+            var di = SelectDirectory();
+            if (di != null)
+            {
+                _viewmodel.SetPhotoDestinationDir(di);
+            }
         }
 
         private void Button_Back_Click(object sender, RoutedEventArgs e)
@@ -89,7 +105,13 @@ namespace PhotoSorter.Views
             _viewmodel.NextPhoto();
         }
 
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            _viewmodel.SaveSettings();
+        }
         # endregion
+
+
     }
 
     // Allow Viewmodel to access these methods on the view only
