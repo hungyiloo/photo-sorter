@@ -10,7 +10,7 @@
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
                 <MenuItem Header="_Load Photos" Click="MenuItem_LoadPhotos_Click"/>
-                <MenuItem Header="_Set Destination"/>
+                <MenuItem Header="_Set Destination" Click="MenuItem_SetDestination_Click"/>
             </MenuItem>
         </Menu>
         <Grid>

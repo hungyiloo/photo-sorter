@@ -20,11 +20,20 @@ namespace PhotoSorter
 {
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
+        public MainWindow()
+        {
+            InitializeComponent();
+        }
+
+        # region Public Properties
+
         public DirectoryInfo PhotoSourceDir { get; set; }
         public DirectoryInfo PhotoDestinationDir { get; set; }
         public IterableList<FileInfo> Photos { get; set; }
-        public bool SortingMode {
-            get {
+        public bool SortingMode
+        {
+            get
+            {
                 return PhotoSourceDir != null && PhotoDestinationDir != null;
             }
         }
@@ -48,12 +57,11 @@ namespace PhotoSorter
             }
         }
 
-        public MainWindow()
-        {
-            InitializeComponent();
-        }
+        # endregion
 
-        public void SetPhotoSourceDir() {
+        # region Private Methods (Imperative)
+
+        private void _SetPhotoSourceDir() {
             var dialog = new FolderBrowserDialog();
             DialogResult result = dialog.ShowDialog();
             if (result == System.Windows.Forms.DialogResult.OK)
@@ -80,7 +88,7 @@ namespace PhotoSorter
                 OnPropertyChanged("Photo");
             }
         }
-        public void SetPhotoDestinationDir()
+        private void _SetPhotoDestinationDir()
         {
             var dialog = new FolderBrowserDialog();
             DialogResult result = dialog.ShowDialog();
@@ -91,7 +99,7 @@ namespace PhotoSorter
                 OnPropertyChanged("SetupMode");
             }
         }
-        public void AcceptPhoto()
+        private void _AcceptPhoto()
         {
             var photo = Photos.Current;
             try
@@ -113,7 +121,7 @@ namespace PhotoSorter
 
             _NextPhoto();
         }
-        public void RejectPhoto()
+        private void _RejectPhoto()
         {
             _NextPhoto();
         }
@@ -137,21 +145,28 @@ namespace PhotoSorter
             }
         }
 
-        # region Click Handlers
+        # endregion
+
+        # region UI Event Handlers
 
         private void MenuItem_LoadPhotos_Click(object sender, RoutedEventArgs e)
         {
-            SetPhotoSourceDir();
+            _SetPhotoSourceDir();
+        }
+
+        private void MenuItem_SetDestination_Click(object sender, RoutedEventArgs e)
+        {
+            _SetPhotoDestinationDir();
         }
 
         private void Button_LoadPhotos_Click(object sender, RoutedEventArgs e)
         {
-            SetPhotoSourceDir();
+            _SetPhotoSourceDir();
         }
 
         private void Button_SetDestination_Click(object sender, RoutedEventArgs e)
         {
-            SetPhotoDestinationDir();
+            _SetPhotoDestinationDir();
         }
 
         private void Button_Back_Click(object sender, RoutedEventArgs e)
@@ -161,12 +176,12 @@ namespace PhotoSorter
 
         private void Button_Accept_Click(object sender, RoutedEventArgs e)
         {
-            AcceptPhoto();
+            _AcceptPhoto();
         }
 
         private void Button_Reject_Click(object sender, RoutedEventArgs e)
         {
-            RejectPhoto();
+            _RejectPhoto();
         }
 
         # endregion
@@ -185,6 +200,5 @@ namespace PhotoSorter
         }
 
         # endregion
-
     }
 }
