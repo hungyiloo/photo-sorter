@@ -109,9 +109,12 @@ namespace PhotoSorter.Views
         {
             _viewmodel.SaveSettings();
         }
+
+        private void StatusBarItem_Progress_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            //new Jump().ShowDialog();
+        }
         # endregion
-
-
     }
 
     // Allow Viewmodel to access these methods on the view only

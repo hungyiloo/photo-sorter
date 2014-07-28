@@ -33,7 +33,7 @@
                 <StatusBarItem HorizontalAlignment="Left">
                     <TextBlock Text="{Binding CopyDetails}"/>
                 </StatusBarItem>
-                <StatusBarItem HorizontalAlignment="Right">
+                <StatusBarItem HorizontalAlignment="Right" MouseUp="StatusBarItem_Progress_MouseUp">
                     <TextBlock Text="{Binding Progress}"/>
                 </StatusBarItem>
             </StatusBar>
