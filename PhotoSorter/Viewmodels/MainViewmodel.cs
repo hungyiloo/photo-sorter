@@ -54,6 +54,25 @@ namespace PhotoSorter.Viewmodels
                 return img;
             }
         }
+        public string CopyDetails
+        {
+            get
+            {
+                return String.Format(
+                    "{0} => {1}{2}", 
+                    _Photos != null && _Photos.Current != null ? _Photos.Current.FullName : "[source]", 
+                    _PhotoDestinationDir == null ? "[destination]" : _PhotoDestinationDir.FullName + "\\",
+                    _Photos != null && _Photos.Current != null ? _Photos.Current.Name : "" // TODO: transform name
+                ); 
+            }
+        }
+        public string Progress
+        {
+            get
+            {
+                return _Photos != null ? String.Format("{0}/{1}", _Photos.Position + 1, _Photos.Count) : "?/?";
+            }
+        }
 
         # endregion
 
@@ -87,12 +106,16 @@ namespace PhotoSorter.Viewmodels
             OnPropertyChanged("SortingMode");
             OnPropertyChanged("SetupMode");
             OnPropertyChanged("Photo");
+            OnPropertyChanged("Progress");
+            OnPropertyChanged("CopyDetails");
         }
         public void SetPhotoDestinationDir(DirectoryInfo di)
         {
             _PhotoDestinationDir = di;
             OnPropertyChanged("SortingMode");
             OnPropertyChanged("SetupMode");
+            OnPropertyChanged("Progress");
+            OnPropertyChanged("CopyDetails");
         }
         public void AcceptPhoto()
         {
@@ -124,6 +147,8 @@ namespace PhotoSorter.Viewmodels
                 _Photos.MoveNext();
             }
             OnPropertyChanged("Photo");
+            OnPropertyChanged("Progress");
+            OnPropertyChanged("CopyDetails");
         }
 
         public void PreviousPhoto()
@@ -132,6 +157,8 @@ namespace PhotoSorter.Viewmodels
             if (_Photos.MovePrevious())
             {
                 OnPropertyChanged("Photo");
+                OnPropertyChanged("Progress");
+                OnPropertyChanged("CopyDetails");
             }
         }
 
@@ -146,6 +173,8 @@ namespace PhotoSorter.Viewmodels
             {
                 _Photos.Position = _Photos.IndexOf(match);
                 OnPropertyChanged("Photo");
+                OnPropertyChanged("Progress");
+                OnPropertyChanged("CopyDetails");
             }
             else
             {
