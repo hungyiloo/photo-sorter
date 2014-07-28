@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PhotoSorter
+namespace PhotoSorter.Extensions
 {
     // This custom enumerator/iterator is necessary to facilitate forward AND 
     // backward iterating as well as more flexible position control.

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PhotoSorter.Extensions;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
