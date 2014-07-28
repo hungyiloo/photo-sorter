@@ -38,6 +38,5 @@
                 </StatusBarItem>
             </StatusBar>
         </Grid>
-
     </DockPanel>
 </Window>

@@ -103,19 +103,12 @@ namespace PhotoSorter.Viewmodels
                 _view.Alert("No photos found");
                 _PhotoSourceDir = null;
             }
-            OnPropertyChanged("SortingMode");
-            OnPropertyChanged("SetupMode");
-            OnPropertyChanged("Photo");
-            OnPropertyChanged("Progress");
-            OnPropertyChanged("CopyDetails");
+            OnPropertyChanged("SortingMode", "SetupMode", "Progress", "CopyDetails");
         }
         public void SetPhotoDestinationDir(DirectoryInfo di)
         {
             _PhotoDestinationDir = di;
-            OnPropertyChanged("SortingMode");
-            OnPropertyChanged("SetupMode");
-            OnPropertyChanged("Progress");
-            OnPropertyChanged("CopyDetails");
+            OnPropertyChanged("SortingMode", "SetupMode", "Progress", "CopyDetails");
         }
         public void AcceptPhoto()
         {
@@ -146,9 +139,7 @@ namespace PhotoSorter.Viewmodels
                 _Photos.Reset();
                 _Photos.MoveNext();
             }
-            OnPropertyChanged("Photo");
-            OnPropertyChanged("Progress");
-            OnPropertyChanged("CopyDetails");
+            OnPropertyChanged("Photo", "Progress", "CopyDetails");
         }
 
         public void PreviousPhoto()
@@ -156,9 +147,7 @@ namespace PhotoSorter.Viewmodels
             // Try to go back, but do nothing if already at the beginning of the list
             if (_Photos.MovePrevious())
             {
-                OnPropertyChanged("Photo");
-                OnPropertyChanged("Progress");
-                OnPropertyChanged("CopyDetails");
+                OnPropertyChanged("Photo", "Progress", "CopyDetails");
             }
         }
 
@@ -172,9 +161,7 @@ namespace PhotoSorter.Viewmodels
             if (match != null)
             {
                 _Photos.Position = _Photos.IndexOf(match);
-                OnPropertyChanged("Photo");
-                OnPropertyChanged("Progress");
-                OnPropertyChanged("CopyDetails");
+                OnPropertyChanged("Photo", "Progress", "CopyDetails");
             }
             else
             {
@@ -206,6 +193,14 @@ namespace PhotoSorter.Viewmodels
             if (handler != null)
             {
                 handler(this, new PropertyChangedEventArgs(name));
+            }
+        }
+
+        protected void OnPropertyChanged(params string[] names)
+        {
+            foreach (var name in names)
+            {
+                OnPropertyChanged(name);
             }
         }
 
